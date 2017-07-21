@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project name="maven-antrun-" default="main"  >
 <target name="main">
-  <copy file="/Users/mac/Downloads/opentsdb-2.3.0/src/mygnuplot.sh" todir="/Users/mac/Downloads/opentsdb-2.3.0/target/classes"/>
-  <chmod file="/Users/mac/Downloads/opentsdb-2.3.0/target/classes/mygnuplot.sh" perm="ugo+rx"/>
-  <copy file="/Users/mac/Downloads/opentsdb-2.3.0/src/mygnuplot.bat" todir="/Users/mac/Downloads/opentsdb-2.3.0/target/classes"/>
-  <chmod file="/Users/mac/Downloads/opentsdb-2.3.0/target/classes/mygnuplot.bat" perm="ugo+rx"/>
+  <copy file="/Users/mac/Downloads/ots-2.3/src/mygnuplot.sh" todir="/Users/mac/Downloads/ots-2.3/target/classes"/>
+  <chmod file="/Users/mac/Downloads/ots-2.3/target/classes/mygnuplot.sh" perm="ugo+rx"/>
+  <copy file="/Users/mac/Downloads/ots-2.3/src/mygnuplot.bat" todir="/Users/mac/Downloads/ots-2.3/target/classes"/>
+  <chmod file="/Users/mac/Downloads/ots-2.3/target/classes/mygnuplot.bat" perm="ugo+rx"/>
 </target>
 </project>

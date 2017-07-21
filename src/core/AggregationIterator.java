@@ -368,8 +368,15 @@ public class AggregationIterator implements SeekableView, DataPoint,
         continue;
       }
       dp = it.next();
+      
+      long patch_timestamp = dp.timestamp();
+      if (it.getClass().getName().equalsIgnoreCase("net.opentsdb.core.FillingDownsampler")) {
+		  FillingDownsampler filling = (FillingDownsampler)it;
+		  patch_timestamp = filling.timestamp2();
+	  }
+      
       //LOG.debug("Creating iterator #" + i);
-      if (dp.timestamp() >= start_time) {
+      if (patch_timestamp >= start_time ) {
         //LOG.debug("First DP in range for #" + i + ": "
         //          + dp.timestamp() + " >= " + start_time);
         putDataPoint(size + i, dp);

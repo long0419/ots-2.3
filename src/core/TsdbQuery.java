@@ -70,7 +70,6 @@ final class TsdbQuery implements Query {
    * We use this one because it preserves every possible byte unchanged.
    */
   private static final Charset CHARSET = Charset.forName("ISO-8859-1");
-//  private static final Charset CHARSET = Charset.forName("UTF-8");
 
   /** The TSDB we belong to. */
   private final TSDB tsdb;
@@ -428,7 +427,7 @@ final class TsdbQuery implements Query {
     
     row_key_literals = new ByteMap<byte[][]>();
     
-    Collections.sort(filters);
+    Collections.sort(filters);//根据tag key的uid排序呢，参考TagVFilter的compareTo
     final Iterator<TagVFilter> current_iterator = filters.iterator();
     final Iterator<TagVFilter> look_ahead = filters.iterator();
     byte[] tagk = null;
@@ -464,6 +463,9 @@ final class TsdbQuery implements Query {
         next = look_ahead.hasNext() ? look_ahead.next() : null;
       } while (current_iterator.hasNext() && 
           Bytes.memcmp(tagk, current.getTagkBytes()) == 0);
+      
+      if(next != null)
+      	  System.arraycopy(next.getTagkBytes(), 0, tagk, 0, TSDB.tagk_width());
 
       if (gbs > 0) {
         if (group_bys == null) {

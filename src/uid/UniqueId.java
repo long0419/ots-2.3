@@ -66,7 +66,7 @@ public final class UniqueId implements UniqueIdInterface {
   }
   
   /** Charset used to convert Strings to byte arrays and back. */
-  private static final Charset CHARSET = Charset.forName("ISO-8859-1");
+  private static final Charset CHARSET = Charset.forName("UTF-8");
 //  private static final Charset CHARSET = Charset.forName("UTF-8");
 
   /** The single column family used by this class. */
@@ -104,8 +104,12 @@ public final class UniqueId implements UniqueIdInterface {
     new ConcurrentHashMap<String, byte[]>();
   /** Cache for backward mappings (ID to name).
    * The ID in the key is a byte[] converted to a String to be Comparable. */
+  @Deprecated//TODO 修改点，bug:＃1002
   private final ConcurrentHashMap<String, String> id_cache =
     new ConcurrentHashMap<String, String>();
+  
+  private final Map<byte[],String>id_cache2 = new ConcurrentHashMap<byte[], String>();
+  
   /** Map of pending UID assignments */
   private final HashMap<String, Deferred<byte[]>> pending_assignments =
     new HashMap<String, Deferred<byte[]>>();
@@ -207,7 +211,9 @@ public final class UniqueId implements UniqueIdInterface {
 
   /** Returns the number of elements stored in the internal cache. */
   public int cacheSize() {
-    return name_cache.size() + id_cache.size();
+	//TODO 修改点，bug:＃1002
+//    return name_cache.size() + id_cache.size();
+    return name_cache.size() + id_cache2.size();
   }
 
   /** Returns the number of random UID collisions */
@@ -247,7 +253,9 @@ public final class UniqueId implements UniqueIdInterface {
    */
   public void dropCaches() {
     name_cache.clear();
-    id_cache.clear();
+  //TODO 修改点，bug:＃1002
+//    id_cache.clear();
+    id_cache2.clear();
   }
 
   /**
@@ -311,7 +319,9 @@ public final class UniqueId implements UniqueIdInterface {
   }
 
   private String getNameFromCache(final byte[] id) {
-    return id_cache.get(fromBytes(id));
+	//TODO 修改点，bug:＃1002
+//    return id_cache.get(fromBytes(id));
+    return id_cache2.get(id);
   }
 
   private Deferred<String> getNameFromHBase(final byte[] id) {
@@ -324,11 +334,14 @@ public final class UniqueId implements UniqueIdInterface {
   }
 
   private void addNameToCache(final byte[] id, final String name) {
-    final String key = fromBytes(id);
-    String found = id_cache.get(key);
+	  //TODO 修改点，bug:＃1002
+//    final String key = fromBytes(id);
+    String found = id_cache2.get(id);
     if (found == null) {
-      found = id_cache.putIfAbsent(key, name);
+//      found = id_cache.putIfAbsent(key, name);
+      found = id_cache2.putIfAbsent(id, name);
     }
+    
     if (found != null && !found.equals(name)) {
       throw new IllegalStateException("id=" + Arrays.toString(id) + " => name="
           + name + ", already mapped to " + found);
@@ -1044,7 +1057,9 @@ public final class UniqueId implements UniqueIdInterface {
 
     // Update cache.
     addIdToCache(newname, row);            // add     new name -> ID
-    id_cache.put(fromBytes(row), newname);  // update  ID -> new name
+  //TODO 修改点，bug:＃1002
+//    id_cache.put(fromBytes(row), newname);  // update  ID -> new name
+    id_cache2.put(row, newname);  // update  ID -> new name
     name_cache.remove(oldname);             // remove  old name -> ID
 
     // Delete the old forward mapping.
@@ -1106,7 +1121,9 @@ public final class UniqueId implements UniqueIdInterface {
       @Override
       public Object call(final Exception ex) throws Exception {
         name_cache.remove(name);
-        id_cache.remove(fromBytes(uid));
+      //TODO 修改点，bug:＃1002
+//        id_cache.remove(fromBytes(uid));
+        id_cache2.remove(uid);
         LOG.error("Failed to delete " + fromBytes(kind) + " UID " + name 
             + " but still cleared the cache", ex);
         return ex;
@@ -1119,7 +1136,9 @@ public final class UniqueId implements UniqueIdInterface {
       public Deferred<Object> call(final ArrayList<Object> response) 
           throws Exception {
         name_cache.remove(name);
-        id_cache.remove(fromBytes(uid));
+      //TODO 修改点，bug:＃1002
+//        id_cache.remove(fromBytes(uid));
+        id_cache2.remove(uid);
         LOG.info("Successfully deleted " + fromBytes(kind) + " UID " + name);
         return Deferred.fromResult(null);
       }
@@ -1198,7 +1217,7 @@ public final class UniqueId implements UniqueIdInterface {
     }
     final Scanner scanner = client.newScanner(tsd_uid_table);
     scanner.setStartKey(start_row);
-    scanner.setStopKey(end_row);
+//    scanner.setStopKey(end_row);
     scanner.setFamily(ID_FAMILY);
     if (kind_or_null != null) {
       scanner.setQualifier(kind_or_null);
@@ -1665,7 +1684,9 @@ public final class UniqueId implements UniqueIdInterface {
       for (UniqueId unique_id_table : uid_cache_map.values()) {
         LOG.info("After preloading, uid cache '{}' has {} ids and {} names.",
                  unique_id_table.kind(),
-                 unique_id_table.id_cache.size(),
+                 //TODO 修改点，bug:＃1002
+//                 unique_id_table.id_cache.size(),
+                 unique_id_table.id_cache2.size(),
                  unique_id_table.name_cache.size());
       }
     } catch (Exception e) {

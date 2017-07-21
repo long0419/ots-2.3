@@ -155,8 +155,18 @@ public class QueryExecutor {
       sub.setMetric(mq.getMetric());
 
       if (timespan.getDownsampler() != null) {
-        sub.setDownsample(timespan.getDownsampler().getInterval() + "-" + 
+    	  /*
+    	  sub.setDownsample(timespan.getDownsampler().getInterval() + "-" + 
             timespan.getDownsampler().getAggregator());
+            */
+    	  //上面是原始的 下面是我修改的 让exp支持填充
+    	  String  sample = timespan.getDownsampler().getInterval() + "-" + 
+    			  timespan.getDownsampler().getAggregator();
+    	  if(timespan.getDownsampler().getFillPolicy() != null) {
+    		  sample  = sample + "-" + timespan.getDownsampler().getFillPolicy().getPolicy().getName();
+    	  }
+    	  
+    	  sub.setDownsample(sample);
       }
 
       // filters
@@ -698,7 +708,13 @@ public class QueryExecutor {
             ++count;
           }
           for (int i = 0; i < dps.length; i++) {
-            json.writeNumber(dps[i].toDouble());
+            //json.writeNumber(dps[i].toDouble());
+          	// 4.26 for 叶良辰
+            if(Double.isNaN(dps[i].toDouble())) {
+          	  json.writeNull();
+            } else {
+          	  json.writeNumber(dps[i].toDouble());
+            }
           }
           
           json.writeEndArray();
@@ -791,7 +807,13 @@ public class QueryExecutor {
           ++count;
         }
         for (int i = 0; i < dps.length; i++) {
-          json.writeNumber(dps[i].toDouble());
+        	//json.writeNumber(dps[i].toDouble());
+        	// 4.26 for 叶良辰
+          if(Double.isNaN(dps[i].toDouble())) {
+        	  json.writeNull();
+          } else {
+        	  json.writeNumber(dps[i].toDouble());
+          }
         }
         
         json.writeEndArray();

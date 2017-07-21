@@ -223,5 +223,13 @@ public class FillingDownsampler extends Downsampler {
     }
     return timestamp - specification.getInterval();
   }
+  
+  public long timestamp2() {
+    if (run_all) {
+      return query_start;
+    } else if (specification.useCalendar()) {
+      return previous_calendar.getTimeInMillis();
+    }
+    return timestamp;
+  }
 }
-
